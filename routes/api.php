@@ -7,7 +7,7 @@ use App\Http\Controllers\CategoriController;
 use App\Http\Controllers\LogOutControlller;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RegisterController;
-
+use App\Http\Controllers\TagController;
 
 Route::get('/', function () {
     return response()->json([
@@ -21,12 +21,10 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/login', [LoginController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/logout', [LogOutControlller::class, 'logout'])->middleware('auth:sanctum');
 
-Route::prefix('categories')->group(function () {
+Route::prefix('categories')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [CategoriController::class, 'index']);   
     Route::post('/', [CategoriController::class, 'store']);  
-    Route::get('/{id}', [CategoriController::class, 'show']);
-    Route::put('/{id}', [CategoriController::class, 'update']); 
-    Route::delete('/{id}', [CategoriController::class, 'destroy']); 
+    Route::patch('/{id}', [CategoriController::class, 'update']); 
 });
 
 Route::prefix('posts')->middleware('auth:sanctum')->group(function () {
@@ -35,4 +33,10 @@ Route::prefix('posts')->middleware('auth:sanctum')->group(function () {
     Route::get('/{id}', [PostController::class, 'show']); 
     Route::patch('/{id}', [PostController::class, 'update']); 
     Route::delete('/{id}', [PostController::class, 'destroy']);
+});
+
+Route::prefix('tags')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [TagController::class, 'index']);   
+    Route::post('/', [TagController::class, 'store']); 
+    Route::patch('/{id}', [TagController::class, 'update']); 
 });

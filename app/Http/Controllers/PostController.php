@@ -72,7 +72,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Posts $request, string $id)
+    public function update(Posts $request, $id)
     {
         $post = Post::findOrFail($id);
         $data = $request->validated();

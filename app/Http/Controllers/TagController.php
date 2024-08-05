@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categorie;
+use App\Models\Tag;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Http\Requests\Categori;
-use App\Http\Resources\CategoriResource;
+use App\Http\Requests\Tags;
+use App\Http\Resources\TagResource;
 use Illuminate\Support\Facades\Validator;
 
-class CategoriController extends Controller
+class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,27 +22,28 @@ class CategoriController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Categori $request)
+    public function store(Tags $request)
     {
         $rules = $request->rules();
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Gagal Menambahkan Categori',
+                'message' => 'Gagal Menambahkan Tag baru',
                 'data' => $validator->errors()
             ], 400);
         }
 
         $data = $request->validated();
-        $categori = new Categorie($data);
-        $categori->name = $data['name'];
-        $categori->slug = Str::slug($data['name']);
-        $categori->save();
+        $tag = new Tag($data);
+        $tag->name = $data['name'];
+        $tag->slug = Str::slug($data['name']);
+        $tag->save();
         return response()->json([
             'status' => true,
-            'message' => 'Categories berhasil disimpan',
-            'data' => new CategoriResource($categori)
+            'message' => 'Tag berhasil disimpan',
+            'data' => new TagResource($tag)
         ], 200);
+        
     }
 
     /**
@@ -56,9 +57,9 @@ class CategoriController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Categori $request, $id)
+    public function update(Tags $request, $id)
     {
-        $edit = Categorie::findOrFail($id);
+        $edit = Tag::findOrFail($id);
         $data = $request->validated();
         if ($request->has('name')) {
             $data['slug'] = Str::slug($data['name']);
@@ -68,6 +69,7 @@ class CategoriController extends Controller
             'status' => true,
             'message' => 'Berhasil diubah',
         ], 200);
+        
     }
 
     /**
