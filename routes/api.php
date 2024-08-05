@@ -22,17 +22,17 @@ Route::get('/login', [LoginController::class, 'index'])->middleware('auth:sanctu
 Route::get('/logout', [LogOutControlller::class, 'logout'])->middleware('auth:sanctum');
 
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoriController::class, 'index']);   // Menampilkan semua kategori
-    Route::post('/', [CategoriController::class, 'store']);  // Menambahkan kategori baru
-    Route::get('/{id}', [CategoriController::class, 'show']); // Menampilkan kategori berdasarkan ID
-    Route::put('/{id}', [CategoriController::class, 'update']); // Memperbarui kategori berdasarkan ID
-    Route::delete('/{id}', [CategoriController::class, 'destroy']); // Menghapus kategori berdasarkan ID
+    Route::get('/', [CategoriController::class, 'index']);   
+    Route::post('/', [CategoriController::class, 'store']);  
+    Route::get('/{id}', [CategoriController::class, 'show']);
+    Route::put('/{id}', [CategoriController::class, 'update']); 
+    Route::delete('/{id}', [CategoriController::class, 'destroy']); 
 });
 
 Route::prefix('posts')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [PostController::class, 'index']);   
     Route::post('/', [PostController::class, 'store']); 
     Route::get('/{id}', [PostController::class, 'show']); 
-    Route::put('/{id}', [PostController::class, 'update']); 
+    Route::patch('/{id}', [PostController::class, 'update']); 
     Route::delete('/{id}', [PostController::class, 'destroy']);
 });

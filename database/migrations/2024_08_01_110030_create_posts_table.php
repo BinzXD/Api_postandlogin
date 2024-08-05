@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
             $table->string('thumbnail');
-            $table->dateTime('published_at');
-            $table->smallInteger('status');
+            $table->date('published_at')->nullable(); 
+            $table->enum('status', ['draft', 'publish']);
             $table->string('meta_title');
             $table->text('meta_description');
             $table->timestamps();

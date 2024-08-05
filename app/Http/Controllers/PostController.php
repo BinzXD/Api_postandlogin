@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Http\Requests\Posts;
 use Illuminate\Http\Request;
 use App\Http\Resources\PostResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\PostDetailResource;
@@ -30,6 +31,7 @@ class PostController extends Controller
      */
     public function store(Posts $request)
     {
+        
         $data = $request->validated();
         if ($request->hasFile('thumbnail')) {
             $file = $request->file('thumbnail');
@@ -38,11 +40,15 @@ class PostController extends Controller
         }
         
         $data['slug'] = Str::slug($data['title']);
-        $data['status'] = 1;
-        $data['user_id'] = $request->input('user_id');     
-        // auth()->id(); 
+        $data['user_id'] = Auth::id();
         $data['category_id'] = $request->input('category_id');
-        $data['published_at'] = Carbon::now();
+        $data['status'] = $request->input('status', 'draft');
+        if ($data['status'] === 'publish') {
+            $data['published_at'] = $request->input('published_at', Carbon::now());
+        } else {
+            $data['published_at'] = null; 
+        }
+       
 
         $new = new Post($data);
         $new->save();
@@ -70,6 +76,16 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
         $data = $request->validated();
+
+        // if ($post->status === 'publish' && isset($data['status']) && $data['status'] === 'draft') {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Post yang sudah dipublikasikan tidak bisa diubah menjadi draft.',
+        //     ], 400);
+        // }
+        if ($request->has('title')) {
+            $data['slug'] = Str::slug($data['title']);
+        }
         if ($request->hasFile('thumbnail')) {
             if ($post->thumbnail) {
                 Storage::disk('public')->delete($post->thumbnail);
@@ -79,11 +95,13 @@ class PostController extends Controller
             $data['thumbnail'] = $path;
         }
 
-        if ($request->has('title')) {
-            $data['slug'] = Str::slug($data['title']);
+        if (isset($data['status']) && $data['status'] === 'publish') {
+            $data['published_at'] = $request->input('published_at', Carbon::now());
+        } else {
+            $data['published_at'] = null; 
         }
-
         $post->update($data);
+
         return response()->json([
             'status' => true,
             'message' => 'Post berhasil diperbarui',
@@ -97,14 +115,12 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         $post = Post::findOrFail($id);
-        if ($post->thumbnail) {
-            Storage::disk('public')->delete($post->thumbnail);
-        }
-
         $post->delete();
+
         return response()->json([
             'status' => true,
             'message' => 'Post berhasil dihapus',
         ], 200);
+
     }
 }

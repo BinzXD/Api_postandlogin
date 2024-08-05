@@ -29,6 +29,7 @@ class Posts extends FormRequest
             'meta_description' => ['nullable', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
             'user_id' => ['required', 'exists:users,id'],
+            'status' => ['required', 'in:draft,publish'],
             
         ];
     }

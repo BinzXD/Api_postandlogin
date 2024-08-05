@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Post extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'title', 
         'slug',
@@ -22,6 +24,7 @@ class Post extends Model
         'meta_title',
         'meta_description',
     ];
+    protected $dates = ['deleted_at', 'published_at'];
     protected $casts = [
         'published_at' => 'datetime',
     ];
