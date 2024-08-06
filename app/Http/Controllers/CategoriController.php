@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Categori;
 use App\Http\Resources\CategoriResource;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class CategoriController extends Controller
 {
@@ -24,25 +25,31 @@ class CategoriController extends Controller
      */
     public function store(Categori $request)
     {
-        $rules = $request->rules();
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
+        try {
+            $rules = $request->rules();
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+            $data = $validator->validated();
+            $categori = new Categorie($data);
+            $categori->name = $data['name'];
+            $categori->slug = Str::slug($data['name']);
+            $categori->save();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Categories berhasil disimpan',
+                'data' => new CategoriResource($categori)
+            ], 200);
+    
+        } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Gagal Menambahkan Categori',
-                'data' => $validator->errors()
+                'data' => $e->errors()
             ], 400);
         }
-
-        $data = $request->validated();
-        $categori = new Categorie($data);
-        $categori->name = $data['name'];
-        $categori->slug = Str::slug($data['name']);
-        $categori->save();
-        return response()->json([
-            'status' => true,
-            'message' => 'Categories berhasil disimpan',
-            'data' => new CategoriResource($categori)
-        ], 200);
     }
 
     /**

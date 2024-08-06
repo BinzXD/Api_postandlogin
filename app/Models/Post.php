@@ -28,7 +28,7 @@ class Post extends Model
     protected $casts = [
         'published_at' => 'datetime',
     ];
-    public function penulis(): BelongsTo
+    public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

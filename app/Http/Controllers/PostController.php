@@ -22,7 +22,7 @@ class PostController extends Controller
     {
         // $coba = Post::all();
         // return response()->json($coba);
-        $coba = Post::with(['penulis:id,username'])->get();
+        $coba = Post::with(['author:id,username', 'categori:id,name', 'tags:id,name'])->get();
         return PostResource::collection($coba);
     }
 
@@ -31,8 +31,8 @@ class PostController extends Controller
      */
     public function store(Posts $request)
     {
-        
         $data = $request->validated();
+        
         if ($request->hasFile('thumbnail')) {
             $file = $request->file('thumbnail');
             $path = $file->store('thumbnails', 'public'); 
@@ -43,21 +43,35 @@ class PostController extends Controller
         $data['user_id'] = Auth::id();
         $data['category_id'] = $request->input('category_id');
         $data['status'] = $request->input('status', 'draft');
+        
         if ($data['status'] === 'publish') {
             $data['published_at'] = $request->input('published_at', Carbon::now());
         } else {
             $data['published_at'] = null; 
         }
-       
-
-        $new = new Post($data);
-        $new->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Post berhasil disimpan',
-            'data' => new PostResource($new)
-        ], 200);
+    
+        try {
+            $post = new Post($data);
+            $post->save();
+            
+            // Tambahkan tag ke post
+            if ($request->has('tags')) {
+                $tags = $request->input('tags'); 
+                $post->tags()->attach($tags);
+            }
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Post berhasil disimpan',
+                'data' => new PostResource($post->loadMissing('author:id,username', 'categori:id,name', 'tags:id,name'))
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menyimpan post',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -65,7 +79,7 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $detail = Post::with(['penulis:id,username', 'categori:id,name', 'tags:id,name'])->findorFail($id);
+        $detail = Post::with(['author:id,username', 'categori:id,name', 'tags:id,name'])->findorFail($id);
         return new PostDetailResource($detail);
     }
 

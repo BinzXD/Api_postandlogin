@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title', 100)->unique();
             $table->string('slug');
-            $table->string('content');
+            $table->text('content');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
             $table->string('thumbnail');
             $table->date('published_at')->nullable(); 
             $table->enum('status', ['draft', 'publish']);
-            $table->string('meta_title');
+            $table->string('meta_title', 100);
             $table->text('meta_description');
             $table->timestamps();
             $table->softDeletes();

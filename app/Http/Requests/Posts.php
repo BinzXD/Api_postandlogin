@@ -22,10 +22,10 @@ class Posts extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'unique:posts,title', 'max:255'],
+            'title' => ['required', 'string', 'unique:posts,title', 'max:100'],
             'content' => ['required'],
             'thumbnail' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg'],
-            'meta_title' => ['nullable', 'string', 'max:255'], 
+            'meta_title' => ['nullable', 'string', 'max:100'], 
             'meta_description' => ['nullable', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
             'user_id' => ['required', 'exists:users,id'],

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Http\Requests\Tags;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Http\Requests\Tags;
 use App\Http\Resources\TagResource;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class TagController extends Controller
 {
@@ -24,26 +25,37 @@ class TagController extends Controller
      */
     public function store(Tags $request)
     {
-        $rules = $request->rules();
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
+        try {
+            $rules = $request->rules();
+            $validator = Validator::make($request->all(), $rules);
+    
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            $data = $validator->validated();
+            $tag = new Tag();
+            $tag->name = $data['name'];
+            $tag->slug = Str::slug($data['name']);
+            $tag->save();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Tag berhasil disimpan',
+                'data' => new TagResource($tag)
+            ], 200);
+    
+        } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Gagal Menambahkan Tag baru',
-                'data' => $validator->errors()
+                'data' => $e->errors()
             ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menyimpan tag',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $data = $request->validated();
-        $tag = new Tag($data);
-        $tag->name = $data['name'];
-        $tag->slug = Str::slug($data['name']);
-        $tag->save();
-        return response()->json([
-            'status' => true,
-            'message' => 'Tag berhasil disimpan',
-            'data' => new TagResource($tag)
-        ], 200);
-        
     }
 
     /**

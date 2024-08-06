@@ -22,7 +22,7 @@ class Categori extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:categories,name', 'max:255'],
+            'name' => ['required', 'string', 'unique:categories,name', 'max:50'],
         ];
     }
 }
