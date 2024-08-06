@@ -89,7 +89,6 @@ class PostController extends Controller
     public function update(Posts $request, string $id)
     {
         $post = Post::findOrFail($id);
-        dd($request);
         $data = $request->validated();
         if ($request->has('title')) {
             $data['slug'] = Str::slug($data['title']);
