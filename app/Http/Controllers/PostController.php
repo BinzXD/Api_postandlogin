@@ -86,17 +86,11 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Posts $request, $id)
+    public function update(Posts $request, string $id)
     {
         $post = Post::findOrFail($id);
+        dd($request);
         $data = $request->validated();
-
-        // if ($post->status === 'publish' && isset($data['status']) && $data['status'] === 'draft') {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Post yang sudah dipublikasikan tidak bisa diubah menjadi draft.',
-        //     ], 400);
-        // }
         if ($request->has('title')) {
             $data['slug'] = Str::slug($data['title']);
         }
@@ -114,13 +108,26 @@ class PostController extends Controller
         } else {
             $data['published_at'] = null; 
         }
-        $post->update($data);
+        try {
+            if ($request->has('tags')) {
+                $tags = $request->input('tags');
+                $post->tags()->sync($tags);
+            }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Post berhasil diperbarui',
-            'data' => new PostResource($post)
-        ], 200);
+            $post->update($data);
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Perubahan Berhasil Disimpan',
+                'data' => new PostResource($post->loadMissing('author:id,username', 'categori:id,name', 'tags:id,name'))
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menyimpan peruahan',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
